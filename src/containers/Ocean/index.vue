@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import * as THREE from "three";
 import * as TWEEN from '@tweenjs/tween.js'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -13,6 +13,10 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Water } from 'three/examples/jsm/objects/Water';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js';
+import lensflareTexture0 from '@/containers/Ocean/images/lensflare0.png';
+import lensflareTexture1 from '@/containers/Ocean/images/lensflare1.png';
+import vertexShader from '@/containers/Ocean/shaders/rainbow/vertex.glsl';
+import fragmentShader from '@/containers/Ocean/shaders/rainbow/fragment.glsl';
 import WebglThreeRender from '@/utils/WebglThreeRender'
 import waterTexture from '@/containers/Ocean/images/waternormals.jpg';
 
@@ -216,9 +220,35 @@ class OceanWebgl {
     this.initRender()
     this.initCamera()
     this.initLight()
-    this.initControls()
     this.initModel()
+    this.initControls()
     this.animate()
+  }
+
+  initRender() {
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(
+      this.webglCanvas.clientWidth,
+      this.webglCanvas.clientHeight
+    )
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+    //告诉渲染器需要阴影效果
+    this.renderer.shadowMap.enabled = false
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap // 默认的是，没有设置的这个清晰 THREE.PCFShadowMap
+    this.webglCanvas.appendChild(this.renderer.domElement)
+
+    this.clock = new THREE.Clock();
+  }
+  initCamera() {
+    this.camera = new THREE.PerspectiveCamera(
+      800,
+      this.webglCanvas.clientWidth / this.webglCanvas.clientHeight,
+      0.1,
+      10000
+    )
+    this.camera.position.set(60, 280, 280)
   }
 
   initLight() {
@@ -227,24 +257,49 @@ class OceanWebgl {
      */
     var ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
     ambientLight.name = '_ambientLight'
-    // this.scene.add(ambientLight)
+    this.scene.add(ambientLight)
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.color.setHSL(.1, 1, .95);
+    dirLight.position.set(-1, 1.75, 1);
+    dirLight.position.multiplyScalar(30);
+    this.scene.add(dirLight);
+
+    // 太阳点光源
+    const pointLight = new THREE.PointLight(0xffffff, 1.2, 2000);
+    pointLight.color.setHSL(.995, .5, .9);
+    pointLight.position.set(0, 45, -2000);
+    const textureLoader = new THREE.TextureLoader();
+    const textureFlare0 = textureLoader.load(lensflareTexture0);
+    const textureFlare1 = textureLoader.load(lensflareTexture1);
+    // 镜头光晕
+    const lensflare = new Lensflare();
+    lensflare.addElement(new LensflareElement(textureFlare0, 600, 0, pointLight.color));
+    lensflare.addElement(new LensflareElement(textureFlare1, 60, .6));
+    lensflare.addElement(new LensflareElement(textureFlare1, 70, .7));
+    lensflare.addElement(new LensflareElement(textureFlare1, 120, .9));
+    lensflare.addElement(new LensflareElement(textureFlare1, 70, 1));
+    pointLight.add(lensflare);
+
+
+
     /**
      * 打三个方向的光
      */
     var directionalLight = new THREE.DirectionalLight(0xffffff, 1)
     directionalLight.name = '_directionalLight'
     directionalLight.position.set(180, 100, 50)
-    this.scene.add(directionalLight)
+    // this.scene.add(directionalLight)
 
     var directionalLight2 = new THREE.DirectionalLight(0xffffff, 1)
     directionalLight2.name = '_directionalLight2'
     directionalLight2.position.set(-180, 100, 50)
-    this.scene.add(directionalLight2)
+    // this.scene.add(directionalLight2)
 
     var directionalLight3 = new THREE.DirectionalLight(0xffffff, 1)
     directionalLight3.name = '_directionalLight3'
     directionalLight3.position.set(-180, 100, -50)
-    this.scene.add(directionalLight3)
+    // this.scene.add(directionalLight3)
   }
 
   initModel() {
@@ -294,6 +349,8 @@ class OceanWebgl {
         if (child.isMesh) {
           child.material.metalness = .4;
           child.material.roughness = .6;
+          // child.material.depthTest = true; // 或者尝试设置为false
+          // child.material.transparent = true; // 或者尝试设置为false
         }
       })
       island.position.set(0, -5, 0)
@@ -301,6 +358,21 @@ class OceanWebgl {
       this.island = island
       this.scene.add(island)
     })
+
+
+    // 虹
+    const material = new THREE.ShaderMaterial({
+      side: THREE.DoubleSide,
+      transparent: true,
+      uniforms: {},
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader
+    });
+    const geometry = new THREE.TorusGeometry(200, 10, 50, 100);
+    const torus = new THREE.Mesh(geometry, material);
+    (torus as any).opacity = .1;
+    torus.position.set(0, -50, -400);
+    // this.scene.add(torus);
   }
 
   initControls() {
@@ -311,36 +383,13 @@ class OceanWebgl {
     this.controls.maxPolarAngle = 1.5;
     this.controls.minDistance = 50;
     this.controls.maxDistance = 1200;
-  }
-  initCamera() {
-    this.camera = new THREE.PerspectiveCamera(
-      800,
-      this.webglCanvas.clientWidth / this.webglCanvas.clientHeight,
-      0.1,
-      10000
-    )
-    this.camera.position.set(60, 280, 280)
-  }
-
-  initRender() {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    this.renderer.setSize(
-      this.webglCanvas.clientWidth,
-      this.webglCanvas.clientHeight
-    )
-    //告诉渲染器需要阴影效果
-    this.renderer.shadowMap.enabled = false
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap // 默认的是，没有设置的这个清晰 THREE.PCFShadowMap
-    this.webglCanvas.appendChild(this.renderer.domElement)
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-
-    this.clock = new THREE.Clock();
+    this.controls.enabled = true;
   }
 
   animate(): void {
     this.renderer.render(this.scene, this.camera)
     requestAnimationFrame(this.animate.bind(this));
-    this.water.material.uniforms['time'].value += 2 / 60.0;
+    // this.water.material.uniforms['time'].value += 2 / 60.0;
     // stats && stats.update();
     this.controls && this.controls.update();
     TWEEN && TWEEN.update();
@@ -356,7 +405,7 @@ class OceanWebgl {
   }
 }
 
-const webgl = ref<OceanWebgl>()
+const webgl = ref<OceanWebgl | null>(null)
 const sizes = ref({
   width: 0,
   height: 0
@@ -377,6 +426,15 @@ function initThree() {
 
 onMounted(() => {
   initThree()
+})
+
+onBeforeUnmount(() => {
+  console.log('组件销毁了！')
+  if (webgl.value) {
+    // console.log(webgl.value.animate)
+    cancelAnimationFrame(webgl.value.animate as any);
+    webgl.value.scene.clear();
+  }
 })
 </script>
 

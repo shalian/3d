@@ -2,6 +2,7 @@ import type { ConfigEnv } from 'vite'
 import { loadEnv, defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
+import glsl from "vite-plugin-glsl"
 
 function pathResolve(dir: string) {
   return resolve(process.cwd(), '.', dir)
@@ -14,7 +15,10 @@ export default ({ mode }: ConfigEnv) => {
   console.log(env)
   return defineConfig({
     base: './',
-    plugins: [vue()],
+    plugins: [
+      vue(),
+      glsl()
+    ],
     resolve: {
       alias: {
         '@': '/src',
