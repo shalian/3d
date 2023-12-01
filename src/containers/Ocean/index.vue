@@ -48,7 +48,7 @@ class OceanWebgl extends WebglThreeRender {
           child.material.roughness = .6;
         }
       })
-      island.position.set(0, -5, 0)
+      island.position.set(0, -5.5, 0)
       island.scale.set(80, 80, 80)
       this.island = island
       this.scene.add(island)
@@ -68,7 +68,6 @@ class OceanWebgl extends WebglThreeRender {
 
       const mixer = new THREE.AnimationMixer(mesh);
       mixer.clipAction(gltf.animations[0]).setDuration(1.2).play();
-      console.log(mixer.clipAction(gltf.animations[0]).setDuration(1.2))
       this.mixers.push(mixer);
 
       const mixer2 = new THREE.AnimationMixer(bird2);
@@ -149,7 +148,7 @@ class OceanWebgl extends WebglThreeRender {
     const geometry = new THREE.TorusGeometry(200, 10, 50, 100);
     const torus = new THREE.Mesh(geometry, material);
     (torus as any).opacity = .1;
-    torus.position.set(0, -10, -650);
+    torus.position.set(0, -80, -650);
     torus.scale.set(1.8, 1.8, 1.8)
     this.scene.add(torus);
   }
@@ -219,12 +218,13 @@ class OceanWebgl extends WebglThreeRender {
   resetCamera() {
     this.camera.near = 10
     this.camera.updateProjectionMatrix();
-    this.camera.position.set(30, 280, 280)
+    // this.camera.position.set(30, 250, 220)
+    this.camera.position.set(65, 160, 320)
   }
   resetControls() {
     this.controls.target.set(0, 0, 0);
-    this.controls.maxPolarAngle = 1.5;
-    this.controls.minDistance = 100;
+    this.controls.maxPolarAngle = 1.4;
+    this.controls.minDistance = 180;
     this.controls.maxDistance = 800;
     this.controls.enabled = true;
   }
@@ -253,7 +253,6 @@ const sizes = ref({
 
 function initThree() {
   const canvas = document.getElementById('ocean-webgl') as HTMLElement
-  // console.log(canvas.offsetWidth)
   sizes.value = {
     width: canvas.offsetWidth,
     height: canvas.offsetHeight
@@ -262,8 +261,8 @@ function initThree() {
     logarithmicDepthBuffer: false // 解决深度冲突
   })
   // webgl.value.removeLight()
-  webgl.value.initHelper()
-  console.log(webgl.value);
+  // webgl.value.initHelper()
+  // console.log(webgl.value);
 }
 
 onMounted(() => {
