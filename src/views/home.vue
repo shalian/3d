@@ -4,7 +4,7 @@
       <li>
         <RouterLink to="/ocean">
           <!-- <div class="preview"> -->
-          <img :src="Ocean" alt="">
+          <img src="../containers/Ocean/images/_preview.png" alt="">
           <!-- </div> -->
           <h3>海中小岛</h3>
         </RouterLink>

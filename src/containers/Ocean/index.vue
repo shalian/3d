@@ -216,7 +216,7 @@ class OceanWebgl extends WebglThreeRender {
     // }
   }
   resetCamera() {
-    this.camera.near = 10
+    this.camera.near = 1
     this.camera.updateProjectionMatrix();
     // this.camera.position.set(30, 250, 220)
     this.camera.position.set(65, 160, 320)
