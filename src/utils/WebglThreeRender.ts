@@ -29,8 +29,8 @@ export default class WebglThreeRender {
   controls!: OrbitControls
   GLTFSCENE: any
   loader: any
-  clock: THREE.Clock | undefined
-  raycaster: THREE.Raycaster | undefined
+  clock!: THREE.Clock
+  raycaster!: THREE.Raycaster
 
 
   /**
@@ -40,13 +40,21 @@ export default class WebglThreeRender {
   labelRenderer!: CSS2DRenderer
   css2group!: THREE.Group
 
-  constructor(DOM: HTMLElement) {
+  // other
+  logarithmicDepthBuffer!: boolean
+
+  constructor(DOM: HTMLElement, options?: any) {
     this.webglCanvas = DOM
+    this.logarithmicDepthBuffer = options?.logarithmicDepthBuffer || false; // 解决深度冲突
     this.draw()
   }
 
   initRender() {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      logarithmicDepthBuffer: this.logarithmicDepthBuffer
+    })
     this.renderer.setSize(
       this.webglCanvas.clientWidth,
       this.webglCanvas.clientHeight

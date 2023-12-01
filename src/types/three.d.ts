@@ -13,5 +13,7 @@
 // declare module 'three/examples/jsm/objects/Lensflare.js' {
 // }
 
-// declare module '@tweenjs/tween.js' {
-// }
+declare module '*.glsl' {
+  let str: string
+  export default str
+}
