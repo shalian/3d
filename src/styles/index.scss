@@ -16,9 +16,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+li {
+  list-style: none;
+}
+
 a {
-  font-weight: 500;
-  color: #646cff;
+  color: var(--g-color);
   text-decoration: inherit;
 }
 
@@ -46,7 +49,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--g-color-button);
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -69,6 +72,7 @@ button:focus-visible {
   margin: 0 auto;
   // padding: 2rem;
   text-align: center;
+  box-sizing: border-box;
 }
 
 @media (prefers-color-scheme: light) {

@@ -1,13 +1,20 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import Home from '@/containers/Ocean/index.vue'
+// 
+import Home from '@/views/home.vue'
+const OceanComponent = () => import('@/containers/Ocean/index.vue');
 
 const routes = [
   {
-    path: '/test',
+    path: '/',
     name: 'Home',
     component: Home,
   },
   // 添加其他路由
+  {
+    path: '/ocean',
+    name: 'Ocean',
+    component: OceanComponent,
+  },
 ];
 
 const router = createRouter({
