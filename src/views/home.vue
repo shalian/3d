@@ -9,6 +9,14 @@
           <h3>海中小岛</h3>
         </RouterLink>
       </li>
+      <li>
+        <RouterLink to="/lunar">
+          <!-- <div class="preview"> -->
+          <img src="../containers/Ocean/images/_preview.png" alt="">
+          <!-- </div> -->
+          <h3>恭喜发财</h3>
+        </RouterLink>
+      </li>
     </ul>
   </div>
 </template>

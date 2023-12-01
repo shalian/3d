@@ -1,6 +1,6 @@
 <template>
-  <div id="ocean">
-    <div id="ocean-webgl"></div>
+  <div id="ocean" class="webgl">
+    <div id="ocean-webgl" class="webgl-3d"></div>
   </div>
 </template>
 
@@ -280,13 +280,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-#ocean {
-  width: 100vw;
-  height: 100vh;
-
-  #ocean-webgl {
-    width: 100%;
-    height: 100%;
-  }
-}
+// 
 </style>

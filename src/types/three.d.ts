@@ -1,17 +1,17 @@
-// declare module 'three/examples/jsm/controls/FBXLoader' {
-// }
+declare module '*.fbx' {
+  const value: string
+  export default value
+}
 
-// declare module 'three/examples/jsm/loaders/GLTFLoader' {
-// }
+declare module '*.glb' {
+  const value: string
+  export default value
+}
 
-// declare module 'three/examples/jsm/objects/Water' {
-// }
-
-// declare module 'three/examples/jsm/objects/Sky' {
-// }
-
-// declare module 'three/examples/jsm/objects/Lensflare.js' {
-// }
+declare module '*.obj' {
+  const value: string
+  export default value
+}
 
 declare module '*.glsl' {
   let str: string

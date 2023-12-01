@@ -28,7 +28,7 @@ export default class WebglThreeRender {
   stats: { dom: any } | undefined
   controls!: OrbitControls
   GLTFSCENE: any
-  loader: any
+  loader!: OBJLoader | FBXLoader | GLTFLoader
   clock!: THREE.Clock
   raycaster!: THREE.Raycaster
 
