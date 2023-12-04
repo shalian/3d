@@ -30,6 +30,10 @@ export default ({ mode }: ConfigEnv) => {
     },
     build: {
       outDir: 'dist'
-    }
+    },
+    esbuild: {
+      pure: ['console.log'], // 安全
+      // drop: ['console'], // esbuild 官方说有风险
+    },
   })
 }
