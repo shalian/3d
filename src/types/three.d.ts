@@ -1,15 +1,19 @@
 declare module '*.fbx' {
-  const value: string
+  const value: any
   export default value
 }
 
 declare module '*.glb' {
-  const value: string
+  const value: any
+  export default value
+}
+declare module '*.gltf' {
+  const value: any
   export default value
 }
 
 declare module '*.obj' {
-  const value: string
+  const value: any
   export default value
 }
 

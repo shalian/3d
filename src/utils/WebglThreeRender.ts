@@ -31,6 +31,7 @@ export default class WebglThreeRender {
   loader!: OBJLoader | FBXLoader | GLTFLoader
   clock!: THREE.Clock
   raycaster!: THREE.Raycaster
+  mixers = [] as Array<THREE.AnimationMixer> // 动画数组
 
 
   /**
@@ -527,5 +528,53 @@ export default class WebglThreeRender {
         child.visible = false
       }
     })
+  }
+
+  /**
+   * @description 取消事件的绑定
+   */
+  removeEventListeners() {
+    this.webglCanvas.removeEventListener('click', () => { })
+    this.webglCanvas.removeEventListener('dblclick', () => { })
+  }
+
+
+
+  /**
+   * @description 销毁 three 场景
+   * @param container new WebglThreeRender() 实例
+   */
+  destroyed(container: WebglThreeRender) {
+    if (!container) return
+    this.removeEventListeners()
+
+    cancelAnimationFrame(this.animate as any);
+    this.scene.traverse(object => {
+      if (object instanceof THREE.Mesh) {
+        // 释放几何体和材质的内存
+        object.geometry.dispose();
+        if (object.material instanceof THREE.Material) {
+          object.material.dispose();
+        } else if (Array.isArray(object.material)) {
+          object.material.forEach(material => material.dispose());
+        }
+      }
+    });
+    this.scene.children.length = 0;
+    this.scene.clear();
+    this.mixers.forEach((mixer: any) => {
+      mixer.stopAllAction();
+      mixer.uncacheRoot(mixer._root); // 如果有缓存根节点，请清除
+    });
+    this.mixers = []
+    this.renderer.dispose();
+
+    if (this.renderer.domElement.parentNode) {
+      this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
+    }
+
+    // container.camera = null
+
+    console.log('Three 已销毁');
   }
 }

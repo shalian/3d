@@ -33,3 +33,15 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
   git branch -M main
   git push -u origin main
 ```
+
+## 问题
+
+1. 报错：`SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON at JSON.parse (<anonymous>)`
+
+`package.json` 中删除 `"homepage": "https://shalian.github.io/3d"`
+
+```bash
+  {
+    "homepage": "https://shalian.github.io/3d",
+  }
+```

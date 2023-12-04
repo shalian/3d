@@ -22,7 +22,6 @@ import waterTexture from '@/containers/Ocean/images/waternormals.jpg';
 
 //#region 
 class OceanWebgl extends WebglThreeRender {
-  mixers: any
   sky!: Sky
   water!: Water
   island: any
@@ -33,7 +32,6 @@ class OceanWebgl extends WebglThreeRender {
 
   constructor(dom: HTMLElement, options = {}) {
     super(dom, options)
-    this.mixers = [];
 
     this.myDraw()
   }
@@ -270,12 +268,15 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  console.log('组件销毁了！')
+  // console.log('组件销毁了！')
+  // webgl.value && webgl.value.destroyed(webgl.value)
   if (webgl.value) {
-    // console.log(webgl.value.animate)
+    webgl.value.destroyed(webgl.value)
     cancelAnimationFrame(webgl.value.animate as any);
+    cancelAnimationFrame(webgl.value.animate2 as any);
     webgl.value.scene.clear();
   }
+  webgl.value = null
 })
 </script>
 
