@@ -58,6 +58,7 @@ export default class WebglThreeRender {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
+      // precision: 'mediump', // 着色器的精度。可以是"highp", "mediump" 或 "lowp". 默认为"highp"，如果设备支持的话。
       logarithmicDepthBuffer: this.logarithmicDepthBuffer
     })
     this.renderer.setSize(
@@ -374,7 +375,7 @@ export default class WebglThreeRender {
 
   //场景点击事件
   getIntersects(event: any) {
-    // console.log(this.camera.position)
+    console.log(this.camera.position)
     event.preventDefault() // 阻止默认的点击事件执行, https://developer.mozilla.org/zh-CN/docs/Web/API/Event/preventDefault
 
     //声明 rayCaster 和 mouse 变量

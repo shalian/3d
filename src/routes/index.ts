@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import Home from '@/views/home.vue'
 const OceanComponent = () => import('@/containers/Ocean/index.vue');
 const LunarComponent = () => import('@/containers/Lunar/index.vue');
+const ChristmasComponent = () => import('@/containers/Christmas/index.vue');
 
 const routes = [
   {
@@ -20,6 +21,11 @@ const routes = [
     path: '/lunar',
     name: 'Lunar',
     component: LunarComponent,
+  },
+  {
+    path: '/christmas',
+    name: 'Christmas',
+    component: ChristmasComponent,
   },
 ];
 
