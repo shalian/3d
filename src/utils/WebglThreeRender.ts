@@ -13,6 +13,8 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import Animations from './animations'
+import { Ref } from 'vue'
 
 
 export default class WebglThreeRender {
@@ -25,13 +27,15 @@ export default class WebglThreeRender {
   camera!: any
   scene!: THREE.Scene
   light: any
-  stats: { dom: any } | undefined
+  stats: { dom: any } | undefined // 性能组件
   controls!: OrbitControls
   GLTFSCENE: any
   loader!: OBJLoader | FBXLoader | GLTFLoader
   clock!: THREE.Clock
   raycaster!: THREE.Raycaster
   mixers = [] as Array<THREE.AnimationMixer> // 动画数组
+  animateId!: number // 动画 ID
+  manager!: THREE.LoadingManager // 
 
 
   /**
@@ -162,7 +166,7 @@ export default class WebglThreeRender {
       if (targetLightName.includes(light.name)) {
         // 从场景中移除灯光
         this.scene.remove(light);
-        console.log("灯光已移除：" + light.name);
+        // console.log("灯光已移除：" + light.name);
         // break; // 如果只有一个匹配的灯光，可以提前结束循环
       }
     }
@@ -241,7 +245,7 @@ export default class WebglThreeRender {
     // this.stats && this.stats.update();
     this.controls && this.controls.update();
     TWEEN && TWEEN.update()
-    requestAnimationFrame(this.animate.bind(this))
+    this.animateId = requestAnimationFrame(this.animate.bind(this))
   }
   draw() {
     this.clock = new THREE.Clock();
@@ -257,7 +261,7 @@ export default class WebglThreeRender {
     window.onresize = this.onWindowResize.bind(this)
     this.onWindowResize()
   }
-  async initModel(type: 'glb' | 'fbx' | 'obj', model: any) {
+  initModel(): void {
     const geometry = new THREE.BoxGeometry()
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
     const cube = new THREE.Mesh(geometry, material)
@@ -266,45 +270,20 @@ export default class WebglThreeRender {
     // this.scene.add(cube)
 
     // let loader: GLTFLoader | FBXLoader | OBJLoader
-    switch (type) {
-      case 'fbx':
-        this.loader = new FBXLoader()
-        break;
-      case 'glb':
-        this.loader = new GLTFLoader()
-        break;
-      case 'obj':
-        this.loader = new OBJLoader()
-        break;
-      default:
-        break;
-    }
+    // switch (type) {
+    //   case 'fbx':
+    //     this.loader = new FBXLoader()
+    //     break;
+    //   case 'glb':
+    //     this.loader = new GLTFLoader()
+    //     break;
+    //   case 'obj':
+    //     this.loader = new OBJLoader()
+    //     break;
+    //   default:
+    //     break;
+    // }
     // console.log(this.loader)
-    let _model = null
-    if (this.loader) {
-      console.log(this.loader, model)
-      // const res = await this.loader.loadAsync(model)
-      // if (type == 'glb') {
-      //   _model = res.scene
-      //   this.scene.add(res.scene)
-      // } else {
-      //   _model = res
-      //   this.scene.add(res)
-      // }
-
-      // loader.load(model, (res: any) => {
-      //   console.log(res)
-      //   if (type == 'glb') {
-      //     _model = res.scene
-      //     this.scene.add(res.scene)
-      //   } else {
-      //     _model = res
-      //     this.scene.add(res)
-      //   }
-      //   // res.scene.scale.set(20, 20, 20)  
-      // })
-    }
-    return _model
 
     // var _this = this
     // const loader = new FBXLoader()
@@ -367,6 +346,30 @@ export default class WebglThreeRender {
   initHelper() {
     var helper = new THREE.AxesHelper(350)
     this.scene.add(helper)
+  }
+
+  // 初始动画
+  initManager(state: Ref<{ loadingTimeout: any, loadingProcess: number }>, target = this.camera.position) {
+    this.manager = new THREE.LoadingManager();
+    this.manager.onStart = (url, loaded, total) => { };
+    this.manager.onLoad = () => { console.log('Loading complete!') };
+    this.manager.onProgress = async (url, loaded, total) => {
+      if (Math.floor(loaded / total * 100) === 100) {
+        state.value.loadingTimeout && clearTimeout(state.value.loadingTimeout);
+        state.value.loadingTimeout = setTimeout(() => {
+          state.value.loadingProcess = Math.floor(loaded / total * 100)
+          Animations.animateCamera(this.camera, this.controls, target, { x: 0, y: 0, z: 0 }, 2400, () => { });
+        }, 800) as any;
+        // _this.loadingProcessTimeout && clearTimeout(_this.loadingProcessTimeout);
+        // _this.loadingProcessTimeout = setTimeout(() => {
+        //   _this.setState({ loadingProcess: Math.floor(loaded / total * 100) });
+        //   Animations.animateCamera(camera, controls, { x: 0, y: 5, z: 21 }, { x: 0, y: 0, z: 0 }, 2400, () => { });
+        // }, 800);
+      } else {
+        state.value.loadingProcess = Math.floor(loaded / total * 100)
+        // _this.setState({ loadingProcess: Math.floor(loaded / total * 100) });
+      }
+    };
   }
 
   //场景点击事件
@@ -538,8 +541,6 @@ export default class WebglThreeRender {
     this.webglCanvas.removeEventListener('dblclick', () => { })
   }
 
-
-
   /**
    * @description 销毁 three 场景
    * @param container new WebglThreeRender() 实例
@@ -548,7 +549,7 @@ export default class WebglThreeRender {
     if (!container) return
     this.removeEventListeners()
 
-    cancelAnimationFrame(this.animate as any);
+    cancelAnimationFrame(this.animateId);
     this.scene.traverse(object => {
       if (object instanceof THREE.Mesh) {
         // 释放几何体和材质的内存
@@ -560,20 +561,28 @@ export default class WebglThreeRender {
         }
       }
     });
-    this.scene.children.length = 0;
-    this.scene.clear();
+
     this.mixers.forEach((mixer: any) => {
       mixer.stopAllAction();
       mixer.uncacheRoot(mixer._root); // 如果有缓存根节点，请清除
     });
     this.mixers = []
-    this.renderer.dispose();
 
     if (this.renderer.domElement.parentNode) {
       this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
     }
+    this.scene.children.length = 0;
+    this.scene.clear();
+    this.renderer.dispose();
 
-    // container.camera = null
+    setTimeout(() => {
+      const gl = this.renderer.getContext();
+      if (gl) {
+        const ext = gl.getExtension("WEBGL_lose_context");
+        if (ext) ext.loseContext();
+      }
+      this.renderer.forceContextLoss();
+    }, 10);
 
     console.log('Three 已销毁');
   }

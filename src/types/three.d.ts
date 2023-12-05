@@ -21,3 +21,5 @@ declare module '*.glsl' {
   let str: string
   export default str
 }
+
+declare module '@tweenjs/tween.js'

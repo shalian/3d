@@ -1,6 +1,15 @@
 <template>
   <div id="ocean" class="webgl">
-    <div id="ocean-webgl" class="webgl-3d"></div>
+    <div id="ocean-webgl" class="webgl-3d">
+      <Loading v-show="state.loadingProcess != 100">
+        <template #default>
+          <div class="loading">
+            <p>Loading · · ·</p>
+            <span class="process">{{ state.loadingProcess }}%</span>
+          </div>
+        </template>
+      </Loading>
+    </div>
   </div>
 </template>
 
@@ -19,16 +28,16 @@ import vertexShader from '@/containers/Ocean/shaders/rainbow/vertex.glsl';
 import fragmentShader from '@/containers/Ocean/shaders/rainbow/fragment.glsl';
 import WebglThreeRender from '@/utils/WebglThreeRender'
 import waterTexture from '@/containers/Ocean/images/waternormals.jpg';
+import Animations from '@/utils/animations';
+import Loading from '../loading.vue';
 
 //#region 
 class OceanWebgl extends WebglThreeRender {
   sky!: Sky
   water!: Water
   island: any
-  state = {
-    loadingProcess: 0,
-    sceneReady: false
-  }
+  animateId2!: number;
+  gltfLoader!: GLTFLoader // gltf/glb
 
   constructor(dom: HTMLElement, options = {}) {
     super(dom, options)
@@ -36,9 +45,9 @@ class OceanWebgl extends WebglThreeRender {
     this.myDraw()
   }
 
-  loadModel() {
-    this.loader = new GLTFLoader()
-    this.loader.load('./models/island.glb', (gltf: any) => {
+  initModel() {
+    this.gltfLoader = new GLTFLoader(this.manager)
+    this.gltfLoader.load('./models/island.glb', (gltf: any) => {
       const island = gltf.scene
       island.traverse((child: any) => {
         if (child.isMesh) {
@@ -51,7 +60,7 @@ class OceanWebgl extends WebglThreeRender {
       this.island = island
       this.scene.add(island)
     })
-    this.loader.load('./models/flamingo.glb', (gltf: any) => {
+    this.gltfLoader.load('./models/flamingo.glb', (gltf: any) => {
       const mesh = gltf.scene.children[0];
       mesh.scale.set(0.4, 0.4, 0.4)
       mesh.position.set(-180, 80, -160)
@@ -151,8 +160,13 @@ class OceanWebgl extends WebglThreeRender {
     this.scene.add(torus);
   }
 
+  initManager() {
+    const target = { x: 41, y: 257, z: 447 }
+    super.initManager(state, target)
+  }
+
   animate2(): void {
-    requestAnimationFrame(this.animate2.bind(this));
+    this.animateId2 = requestAnimationFrame(this.animate2.bind(this));
     this.water.material.uniforms['time'].value += 2 / 60.0;
     // stats && stats.update();
     // this.controls && this.controls.update();
@@ -186,7 +200,7 @@ class OceanWebgl extends WebglThreeRender {
     //     element: document.querySelector('.point-4') as HTMLElement
     //   }
     // ];
-    // if (this.state.sceneReady) {
+    // if (state.value.sceneReady) {
     //   // 遍历每个点
     //   for (const point of points) {
     //     // 获取2D屏幕位置
@@ -213,32 +227,71 @@ class OceanWebgl extends WebglThreeRender {
     //   this.renderer.render(this.scene, this.camera);
     // }
   }
-  resetCamera() {
+  initCamera() {
+    super.initCamera()
     this.camera.near = 1
     this.camera.updateProjectionMatrix();
-    // this.camera.position.set(30, 250, 220)
-    this.camera.position.set(65, 160, 320)
+    // this.camera.position.set(65, 160, 320)
+    this.camera.position.set(373, 777, 1227)
   }
-  resetControls() {
+  initControls() {
+    super.initControls()
     this.controls.target.set(0, 0, 0);
     this.controls.maxPolarAngle = 1.4;
     this.controls.minDistance = 180;
-    this.controls.maxDistance = 800;
+    this.controls.maxDistance = 1500;
     this.controls.enabled = true;
   }
-  resetRender() {
+  initRender() {
+    super.initRender()
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.webglCanvas.addEventListener(
+      'dblclick',
+      (() => {
+        var oldP = {
+          x: this.camera.position.x,
+          y: this.camera.position.y,
+          z: this.camera.position.z,
+        }
+        var oldT = {
+          x: this.controls.target.x,
+          y: this.controls.target.y,
+          z: this.controls.target.z,
+        }
+        // var newP = {
+        //   x: 500,
+        //   y: 432,
+        //   z: -466,
+        // }
+        var newP = { x: 41, y: 257, z: 447 }
+
+        var newT = {
+          x: 0,
+          y: 0,
+          z: 0,
+        }
+        this.animateCamera(oldP, oldT, newP, newT, () => { })
+        // this.camera.position.set(-455, -14, -258);
+      }).bind(this)
+    )
   }
   myDraw() {
+    super.draw()
+    this.initManager()
     this.initSea()
     this.initSky()
     this.initSun()
     this.initTorus()
-    this.loadModel()
-    this.resetCamera()
-    this.resetControls()
-    this.resetRender()
+    this.initModel()
     this.animate2()
+  }
+
+  destroyed(): void {
+    super.destroyed(webgl.value!)
+    cancelAnimationFrame(this.animateId2)
+    // this.gltfLoader.parse('', '', () => { console.log(123) })
+    // this.renderer.dispose()
+    // this.scene.clear()
   }
 }
 //#endregion
@@ -247,6 +300,11 @@ const webgl = ref<OceanWebgl | null>(null)
 const sizes = ref({
   width: 0,
   height: 0
+})
+const state = ref({
+  loadingProcess: 0,
+  sceneReady: false,
+  loadingTimeout: null
 })
 
 function initThree() {
@@ -271,10 +329,13 @@ onBeforeUnmount(() => {
   // console.log('组件销毁了！')
   // webgl.value && webgl.value.destroyed(webgl.value)
   if (webgl.value) {
-    webgl.value.destroyed(webgl.value)
-    cancelAnimationFrame(webgl.value.animate as any);
-    cancelAnimationFrame(webgl.value.animate2 as any);
-    webgl.value.scene.clear();
+    webgl.value.destroyed()
+    // cancelAnimationFrame(webgl.value.animate as any);
+  }
+  state.value = {
+    loadingProcess: 0,
+    loadingTimeout: null,
+    sceneReady: false,
   }
   webgl.value = null
 })

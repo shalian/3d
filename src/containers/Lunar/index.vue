@@ -1,33 +1,70 @@
 <template>
   <div id="lunar" class="webgl">
-    <div id="lunar-webgl" class="webgl-3d"> </div>
+    <div id="lunar-webgl" class="webgl-3d">
+      <Loading v-show="progress != 100">
+        <template #default>
+          <div class="loading">
+            <p>Loading · · ·</p>
+            <span class="process">{{ progress }}%</span>
+          </div>
+        </template>
+      </Loading>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import bgTexture from './images/bg.png';
 import cycleTexture from './images/cycle.png';
 import WebglThreeRender from '@/utils/WebglThreeRender';
+import Loading from '@/containers/loading.vue';
+import Animations from '@/utils/animations';
 
 class Lunar extends WebglThreeRender {
   meshes = [] as Array<THREE.Group>
   cycle!: any
   group = new THREE.Group()
   plane: any
+  gltfLoader!: GLTFLoader
+  fbxLoader!: FBXLoader
+  animateId2!: number;
 
   constructor(canvas: HTMLElement) {
     super(canvas)
-
     this.myDraw()
   }
 
-  loadModel() {
-    const gltfLoader = new GLTFLoader()
-    gltfLoader.load('./models/dragon.gltf', (gltf: any) => {
+  initModel() {
+    // 创建地面
+    var planeGeometry = new THREE.PlaneGeometry(300, 300);
+    // 透明材质显示阴影
+    var planeMaterial = new THREE.ShadowMaterial({ opacity: 0.5 });
+    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.set(0, -0.179, 0);
+    plane.receiveShadow = true;
+    this.plane = plane
+    this.scene.add(plane);
+
+    // 透明材质显示阴影
+    this.cycle = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshPhongMaterial({
+      map: new THREE.TextureLoader().load(cycleTexture),
+      transparent: true,
+      side: THREE.DoubleSide
+    }));
+    this.cycle.rotation.x = -0.5 * Math.PI;
+    this.cycle.position.set(0, -0.18, 0);
+    this.cycle.scale.set(0.12, 0.12, 0.12);
+    this.cycle.receiveShadow = true;
+    this.scene.add(this.cycle);
+
+    // 🐀🐂🐅🐇🐉🐍🐎🐏🐒🐓🐕🐖
+    this.gltfLoader = new GLTFLoader(this.manager)
+    this.gltfLoader.load('./models/dragon.gltf', (gltf: any) => {
       // console.log(gltf)
       const mesh = gltf.scene
       mesh.traverse((child: any) => {
@@ -53,8 +90,8 @@ class Lunar extends WebglThreeRender {
     )
 
     // 文字模型
-    const fbxLoader = new FBXLoader();
-    fbxLoader.load('./models/text.fbx', mesh => {
+    this.fbxLoader = new FBXLoader();
+    this.fbxLoader.load('./models/text.fbx', mesh => {
       mesh.traverse((child: any) => {
         if (child.isMesh) {
           this.meshes.push(mesh);
@@ -74,36 +111,16 @@ class Lunar extends WebglThreeRender {
     });
   }
 
-  initPlane() {
-    // 创建地面
-    var planeGeometry = new THREE.PlaneGeometry(300, 300);
-    // 透明材质显示阴影
-    var planeMaterial = new THREE.ShadowMaterial({ opacity: 0.5 });
-    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.rotation.x = -0.5 * Math.PI;
-    plane.position.set(0, -0.179, 0);
-    plane.receiveShadow = true;
-    this.plane = plane
-    this.scene.add(plane);
-
-    // 透明材质显示阴影
-    this.cycle = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshPhongMaterial({
-      map: new THREE.TextureLoader().load(cycleTexture),
-      transparent: true,
-      side: THREE.DoubleSide
-    }));
-    this.cycle.rotation.x = -0.5 * Math.PI;
-    this.cycle.position.set(0, -0.18, 0);
-    this.cycle.scale.set(0.12, 0.12, 0.12);
-    this.cycle.receiveShadow = true;
-    this.scene.add(this.cycle);
+  initManager() {
+    const target = {
+      x: -0.04,
+      y: 1.9,
+      z: 5.4
+    }
+    super.initManager(state, target)
   }
 
-  resetCamera() {
-    // this.camera.lookAt(0, 0, 0)
-    this.camera.position.set(-0.03605639885864392, 1.9312043546788207, 5.392508662632908)
-  }
-  resetLight() {
+  initLight2() {
     const cubeGeometry = new THREE.BoxGeometry(0.001, 0.001, 0.001);
     const cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xdc161a });
     const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -143,15 +160,42 @@ class Lunar extends WebglThreeRender {
     spotLight.target = this.plane;
     this.scene.add(spotLight);
   }
-  resetAnimate() {
+  animate2() {
     this.cycle.rotation.z += 0.3 / 60
-    requestAnimationFrame(this.resetAnimate.bind(this))
+    this.animateId2 = requestAnimationFrame(this.animate2.bind(this))
     const delta = this.clock.getDelta();
     this.mixers && this.mixers.forEach((item: any) => {
       item.update(delta * 0.4);
     });
   }
-  initRender2(): void {
+
+  myDraw() {
+    super.draw()
+    this.scene.background = new THREE.TextureLoader().load(bgTexture);
+    this.scene.fog = new THREE.Fog(0xdddddd, 100, 120);
+    this.initManager()
+    this.initModel()
+    this.initLight2()
+    this.animate2()
+  }
+  destroyed(): void {
+    super.destroyed(webgl.value!)
+    cancelAnimationFrame(this.animateId2);
+    // this.manager = null as unknown as THREE.LoadingManager
+    // this.meshes = []
+    // this.plane = null
+    // this.controls = null as any
+    // this.renderer.dispose()
+    // this.scene.clear()
+  }
+  initCamera() {
+    super.initCamera()
+    this.camera.position.set(15.658330107719104, 10.293379445948675, 16.548807746161597)
+  }
+  initRender(): void {
+    super.initRender()
+    this.renderer.shadowMap.enabled = true; // 接收阴影
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap // 阴影类型
     this.webglCanvas.addEventListener(
       'dblclick',
       (() => {
@@ -182,34 +226,21 @@ class Lunar extends WebglThreeRender {
       }).bind(this)
     )
   }
-  resetControls() {
+  initControls() {
+    super.initControls()
     this.controls.maxPolarAngle = 1.5;
     this.controls.minDistance = 4;
     this.controls.maxDistance = 25;
   }
-  myDraw() {
-    this.scene.background = new THREE.TextureLoader().load(bgTexture);
-    this.scene.fog = new THREE.Fog(0xdddddd, 100, 120);
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    this.initPlane()
-    this.loadModel()
-    this.resetCamera()
-    this.resetLight()
-    this.resetControls()
-    this.resetAnimate()
-    this.initRender2()
-  }
-  destroyed2(): void {
-    cancelAnimationFrame(this.resetAnimate as any);
-    this.meshes = []
-    this.plane = null
-    this.controls = null as any
-    this.renderer.dispose()
-  }
 }
 
 const webgl = ref<Lunar | null>(null)
+const state = ref({
+  // 页面模型加载进度，0：未加载，100：加载完成
+  loadingProcess: 0,
+  loadingTimeout: null
+})
+const progress = computed(() => state.value.loadingProcess)
 
 function init() {
   const canvas = document.getElementById('lunar-webgl') as HTMLElement
@@ -225,13 +256,22 @@ onBeforeUnmount(() => {
   // console.log('组件销毁了！')
   // webgl.value && webgl.value.destroyed(webgl.value)
   if (webgl.value) {
-    webgl.value.destroyed2()
-    webgl.value.destroyed(webgl.value)
-    cancelAnimationFrame(webgl.value.animate as any);
-    webgl.value.scene.clear();
+    const webglDom = document.getElementById('lunar-webgl')!
+    const canvas = webglDom!.getElementsByTagName('canvas')![0]
+    // webgl.value.renderer = null;
+    webgl.value.destroyed()
+    // cancelAnimationFrame(webgl.value.animate as any);
+    // webgl.value.scene.clear();
 
-    console.log(webgl.value)
+    // webglDom?.removeChild(canvas)
+  }
+  state.value = {
+    loadingProcess: 0,
+    loadingTimeout: null
   }
   webgl.value = null
 })
 </script>
+
+<style scoped lang="scss">
+</style>
