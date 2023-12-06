@@ -54,7 +54,7 @@ export default class WebglThreeRender {
     this.draw()
   }
 
-  initRender() {
+  initRender(target = { x: 12.65, y: 192.75, z: 222.17 }) {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -92,7 +92,7 @@ export default class WebglThreeRender {
         //   y: 432,
         //   z: -466,
         // }
-        var newP = { x: 12.646996215143721, y: 192.75498994165565, z: 222.16958702849763 }
+        var newP = target
 
         var newT = {
           x: 0,
@@ -350,7 +350,7 @@ export default class WebglThreeRender {
   }
 
   // 初始动画
-  initManager(state: Ref<{ loadingTimeout: any, loadingProcess: number }>, target = this.camera.position) {
+  initManager(state: Ref<{ loadingTimeout: any, loadingProcess: number, sceneReady?: boolean }>, target = this.camera.position) {
     this.manager = new THREE.LoadingManager();
     this.manager.onStart = (url, loaded, total) => { };
     this.manager.onLoad = () => { console.log('Loading complete!') };
@@ -359,6 +359,7 @@ export default class WebglThreeRender {
         state.value.loadingTimeout && clearTimeout(state.value.loadingTimeout);
         state.value.loadingTimeout = setTimeout(() => {
           state.value.loadingProcess = Math.floor(loaded / total * 100)
+          state.value.sceneReady = true
           Animations.animateCamera(this.camera, this.controls, target, { x: 0, y: 0, z: 0 }, 2400, () => { });
         }, 800) as any;
         // _this.loadingProcessTimeout && clearTimeout(_this.loadingProcessTimeout);
@@ -375,7 +376,7 @@ export default class WebglThreeRender {
 
   //场景点击事件
   getIntersects(event: any) {
-    console.log(this.camera.position)
+    // console.log(this.camera.position)
     event.preventDefault() // 阻止默认的点击事件执行, https://developer.mozilla.org/zh-CN/docs/Web/API/Event/preventDefault
 
     //声明 rayCaster 和 mouse 变量

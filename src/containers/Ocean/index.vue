@@ -243,37 +243,8 @@ class OceanWebgl extends WebglThreeRender {
     this.controls.enabled = true;
   }
   initRender() {
-    super.initRender()
+    super.initRender({ x: 41, y: 257, z: 447 })
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.webglCanvas.addEventListener(
-      'dblclick',
-      (() => {
-        var oldP = {
-          x: this.camera.position.x,
-          y: this.camera.position.y,
-          z: this.camera.position.z,
-        }
-        var oldT = {
-          x: this.controls.target.x,
-          y: this.controls.target.y,
-          z: this.controls.target.z,
-        }
-        // var newP = {
-        //   x: 500,
-        //   y: 432,
-        //   z: -466,
-        // }
-        var newP = { x: 41, y: 257, z: 447 }
-
-        var newT = {
-          x: 0,
-          y: 0,
-          z: 0,
-        }
-        this.animateCamera(oldP, oldT, newP, newT, () => { })
-        // this.camera.position.set(-455, -14, -258);
-      }).bind(this)
-    )
   }
   myDraw() {
     super.draw()

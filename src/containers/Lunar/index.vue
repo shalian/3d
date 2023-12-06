@@ -193,38 +193,9 @@ class Lunar extends WebglThreeRender {
     this.camera.position.set(15.658330107719104, 10.293379445948675, 16.548807746161597)
   }
   initRender(): void {
-    super.initRender()
+    super.initRender({ x: -0.03605639885864392, y: 1.9312043546788207, z: 5.392508662632908 })
     this.renderer.shadowMap.enabled = true; // 接收阴影
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap // 阴影类型
-    this.webglCanvas.addEventListener(
-      'dblclick',
-      (() => {
-        var oldP = {
-          x: this.camera.position.x,
-          y: this.camera.position.y,
-          z: this.camera.position.z,
-        }
-        var oldT = {
-          x: this.controls.target.x,
-          y: this.controls.target.y,
-          z: this.controls.target.z,
-        }
-        // var newP = {
-        //   x: 500,
-        //   y: 432,
-        //   z: -466,
-        // }
-        var newP = { x: -0.03605639885864392, y: 1.9312043546788207, z: 5.392508662632908 }
-
-        var newT = {
-          x: 0,
-          y: 0,
-          z: 0,
-        }
-        this.animateCamera(oldP, oldT, newP, newT, () => { })
-        // this.camera.position.set(-455, -14, -258);
-      }).bind(this)
-    )
   }
   initControls() {
     super.initControls()
@@ -238,7 +209,8 @@ const webgl = ref<Lunar | null>(null)
 const state = ref({
   // 页面模型加载进度，0：未加载，100：加载完成
   loadingProcess: 0,
-  loadingTimeout: null
+  loadingTimeout: null,
+  sceneReady: false
 })
 const progress = computed(() => state.value.loadingProcess)
 
@@ -267,7 +239,8 @@ onBeforeUnmount(() => {
   }
   state.value = {
     loadingProcess: 0,
-    loadingTimeout: null
+    loadingTimeout: null,
+    sceneReady: false
   }
   webgl.value = null
 })

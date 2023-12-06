@@ -12,9 +12,17 @@
       <li>
         <RouterLink to="/lunar">
           <!-- <div class="preview"> -->
-          <img src="../containers/Ocean/images/_preview.png" alt="">
+          <img src="../containers/Lunar/images/_preview.png" alt="">
           <!-- </div> -->
           <h3>恭喜发财</h3>
+        </RouterLink>
+      </li>
+      <li>
+        <RouterLink to="/christmas">
+          <!-- <div class="preview"> -->
+          <img src="../containers/Christmas/images/_preview.png" alt="">
+          <!-- </div> -->
+          <h3>圣诞快乐</h3>
         </RouterLink>
       </li>
     </ul>
@@ -29,9 +37,24 @@ import Ocean from '@/containers/Ocean/images/_preview.png'
 $border-radius: 8px;
 
 #home-3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
   ul {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     padding: 0;
     margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 180px);
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+    width: 580px;
+    max-height: 750px;
+    overflow: hidden auto;
   }
 
   li {
