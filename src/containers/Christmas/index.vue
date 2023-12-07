@@ -84,7 +84,7 @@ class Christmas extends WebglThreeRender {
   initModel(): void {
     this.gltfLoader = new GLTFLoader(this.manager)
     const group = new THREE.Group()
-    this.gltfLoader.load('./models/merry_christmas.glb', (gltf) => {
+    this.gltfLoader.load('./models/圣诞树.glb', (gltf) => {
       // console.log(gltf)
       const mesh = gltf.scene
       mesh.position.set(-8, -1.8, 10)
@@ -104,7 +104,7 @@ class Christmas extends WebglThreeRender {
       this.mixers.push(mixer);
     }, (process) => { }, (err) => { console.log(err) })
 
-    this.gltfLoader.load('./models/圣诞老人的信4k.glb', (gltf) => {
+    this.gltfLoader.load('./models/圣诞老人的信.glb', (gltf) => {
       // console.log(gltf)
       const mesh = gltf.scene
       mesh.position.set(-3.9, -2, 2.5)
