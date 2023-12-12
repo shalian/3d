@@ -25,12 +25,45 @@
           <h3>圣诞快乐</h3>
         </RouterLink>
       </li>
+      <li>
+        <RouterLink to="/rotatetext">
+          <!-- <div class="preview"> -->
+          <img src="../containers/RotateText/images/_preview.png" alt="">
+          <!-- </div> -->
+          <h3>文字旋转</h3>
+        </RouterLink>
+      </li>
     </ul>
+    <Child v-model="test" @update:modelValue="handleModelValue" />
+    <div>{{ test }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
 import Ocean from '@/containers/Ocean/images/_preview.png'
+import Child from './Child.vue';
+import Cookie from '@/utils/Cookie'
+import { ref } from 'vue';
+const test = ref({
+  name: 's',
+  age: 22,
+  wife: {
+    name: 'a',
+    age: 21
+  }
+})
+const handleModelValue = (data: any) => {
+  console.log(data)
+  test.value = data
+}
+Cookie.set('name', 's')
+
+setTimeout(() => {
+  Cookie.remove('name')
+  console.log(Cookie.get('test2'))
+  console.log(Cookie.get('test4'))
+  console.log('name 删除了')
+}, 3000);
 </script>
 
 <style scoped lang="scss">

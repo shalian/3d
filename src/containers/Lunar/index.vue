@@ -22,7 +22,6 @@ import bgTexture from './images/bg.png';
 import cycleTexture from './images/cycle.png';
 import WebglThreeRender from '@/utils/WebglThreeRender';
 import Loading from '@/containers/loading.vue';
-import Animations from '@/utils/animations';
 
 class Lunar extends WebglThreeRender {
   meshes = [] as Array<THREE.Group>

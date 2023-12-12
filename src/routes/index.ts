@@ -4,6 +4,7 @@ import Home from '@/views/home.vue'
 const OceanComponent = () => import('@/containers/Ocean/index.vue');
 const LunarComponent = () => import('@/containers/Lunar/index.vue');
 const ChristmasComponent = () => import('@/containers/Christmas/index.vue');
+const RotateTextComponent = () => import('@/containers/RotateText/index.vue');
 
 const routes = [
   {
@@ -26,6 +27,11 @@ const routes = [
     path: '/christmas',
     name: 'Christmas',
     component: ChristmasComponent,
+  },
+  {
+    path: '/rotatetext',
+    name: 'RotateText',
+    component: RotateTextComponent,
   },
 ];
 

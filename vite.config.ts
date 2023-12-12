@@ -16,7 +16,13 @@ export default ({ mode }: ConfigEnv) => {
   return defineConfig({
     base: './',
     plugins: [
-      vue(),
+      vue(
+        {
+          script: {
+            defineModel: true,
+          },
+        }
+      ),
       glsl()
     ],
     resolve: {
