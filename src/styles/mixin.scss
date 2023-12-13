@@ -1,0 +1,24 @@
+@mixin scrollbar ($width: 6px) {
+
+  &::-webkit-scrollbar,
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-thumb {
+    width: $width;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--g-color-scrollbar-track);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--g-color-scrollbar-thumb);
+  }
+}
+
+// 单行文本溢出显示 ...
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

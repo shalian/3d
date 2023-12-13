@@ -31,6 +31,14 @@ export default ({ mode }: ConfigEnv) => {
         // 'vue-i18n': pathResolve('./node_modules/vue-i18n/dist/vue-i18n.cjs.js'),
       },
     },
+    css: {
+      preprocessorOptions: {
+        // 这里配置 mixin.scss 混合文件的全局引入
+        scss: {
+          additionalData: `@import "@/styles/mixin.scss";`
+        }
+      }
+    },
     optimizeDeps: {
       include: ['three', 'tween.js'],
     },

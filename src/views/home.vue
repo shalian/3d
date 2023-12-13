@@ -1,69 +1,75 @@
 <template>
   <div id="home-3d">
     <ul>
-      <li>
-        <RouterLink to="/ocean">
-          <!-- <div class="preview"> -->
-          <img src="../containers/Ocean/images/_preview.png" alt="">
-          <!-- </div> -->
-          <h3>海中小岛</h3>
-        </RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/lunar">
-          <!-- <div class="preview"> -->
-          <img src="../containers/Lunar/images/_preview.png" alt="">
-          <!-- </div> -->
-          <h3>恭喜发财</h3>
-        </RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/christmas">
-          <!-- <div class="preview"> -->
-          <img src="../containers/Christmas/images/_preview.png" alt="">
-          <!-- </div> -->
-          <h3>圣诞快乐</h3>
-        </RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/rotatetext">
-          <!-- <div class="preview"> -->
-          <img src="../containers/RotateText/images/_preview.png" alt="">
-          <!-- </div> -->
-          <h3>文字旋转</h3>
+      <li v-for="data in datas" :key="data.url">
+        <RouterLink :to="data.url">
+          <div class="preview">
+            <img :src="data.thumbnail" :alt="data.name">
+          </div>
+          <h3>{{ data.name }}</h3>
         </RouterLink>
       </li>
     </ul>
-    <Child v-model="test" @update:modelValue="handleModelValue" />
-    <div>{{ test }}</div>
+    <!-- <Child v-model="test" @update:modelValue="handleModelValue" /> -->
+    <!-- <div>{{ test }}</div> -->
   </div>
 </template>
 
 <script setup lang="ts">
+// import { ref } from 'vue';
 import Ocean from '@/containers/Ocean/images/_preview.png'
-import Child from './Child.vue';
-import Cookie from '@/utils/Cookie'
-import { ref } from 'vue';
-const test = ref({
-  name: 's',
-  age: 22,
-  wife: {
-    name: 'a',
-    age: 21
-  }
-})
-const handleModelValue = (data: any) => {
-  console.log(data)
-  test.value = data
-}
-Cookie.set('name', 's')
+import Lunar from '@/containers/Lunar/images/_preview.png'
+import Christmas from '@/containers/Christmas/images/_preview.png'
+import RotateText from '@/containers/RotateText/images/_preview.png'
+// import Child from './Child.vue';
+// import Cookie from '@/utils/Cookie'
 
-setTimeout(() => {
-  Cookie.remove('name')
-  console.log(Cookie.get('test2'))
-  console.log(Cookie.get('test4'))
-  console.log('name 删除了')
-}, 3000);
+interface IData {
+  name: string
+  url: string
+  thumbnail: string
+}
+const datas: Array<IData> = [
+  {
+    name: '海中小岛',
+    url: '/ocean',
+    thumbnail: Ocean,
+  }, {
+    name: '恭喜发财',
+    url: '/lunar',
+    thumbnail: Lunar,
+  }, {
+    name: '圣诞快乐',
+    url: '/christmas',
+    thumbnail: Christmas,
+  }, {
+    name: '文字旋转',
+    url: '/rotatetext',
+    thumbnail: RotateText,
+  },
+]
+
+
+// const test = ref({
+//   name: 's',
+//   age: 22,
+//   wife: {
+//     name: 'a',
+//     age: 21
+//   }
+// })
+// const handleModelValue = (data: any) => {
+//   console.log(data)
+//   test.value = data
+// }
+// Cookie.set('name', 's')
+
+// setTimeout(() => {
+//   Cookie.remove('name')
+//   console.log(Cookie.get('test2'))
+//   console.log(Cookie.get('test4'))
+//   console.log('name 删除了')
+// }, 3000);
 </script>
 
 <style scoped lang="scss">
@@ -82,17 +88,37 @@ $border-radius: 8px;
     padding: 0;
     margin: 0;
     display: grid;
-    grid-template-columns: repeat(3, 180px);
+    grid-template-columns: repeat(3, 210px);
     grid-column-gap: 20px;
     grid-row-gap: 20px;
-    width: 580px;
+    // display: flex;
+    // flex-wrap: wrap;
+    // justify-content: flex-start;
+    width: calc(210px * 3 + 20px * 2);
     max-height: 750px;
     overflow: hidden auto;
+    transition: all 0.3s;
+    @include scrollbar();
+  }
+
+  @media screen and (max-width: 750px) {
+    ul {
+      width: calc(210px * 2 + 20px);
+      grid-template-columns: repeat(2, 210px);
+    }
+  }
+
+  @media screen and (max-width: 450px) {
+    ul {
+      width: calc(220px * 1);
+      grid-template-columns: repeat(1, 210px);
+    }
   }
 
   li {
-    width: 180px;
-    // height: 45px;
+    // margin: 10px 0px;
+    width: 210px;
+    height: 245px;
     // border: 1px solid #ccc;
     border-radius: $border-radius;
     cursor: pointer;
@@ -116,17 +142,23 @@ $border-radius: 8px;
 
     .preview {
       width: 100%;
+      height: calc(100% - 36px);
     }
 
     img {
       width: 100%;
+      height: 100%;
       border-top-left-radius: $border-radius;
       border-top-right-radius: $border-radius;
     }
 
     h3 {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin: 0px;
-      width: 180px;
+      width: 100%;
+      height: 36px;
       color: var(--g-color);
       font-size: 18px;
       font-weight: 600;
